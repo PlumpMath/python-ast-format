@@ -38,20 +38,3 @@ class IndentIO(object):
 
         def __exit__(self, typ, value, traceback):
             self.io.level -= 1
-
-# testing
-if __name__ == '__main__':
-    import sys
-    io = IndentIO(sys.stdout)
-
-    io.write('%d\n' % io.level)
-    with io.indent():
-        io.write('%d\n' % io.level)
-        with io.indent():
-            io.write('%d-' % io.level)
-            io.write('%d\n' % io.level)
-            with io.indent():
-                io.write('%d\n' % io.level)
-            io.write('%d\n' % io.level)
-        io.write('%d\n' % io.level)
-    io.write('%d\n' % io.level)

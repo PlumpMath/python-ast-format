@@ -3,7 +3,7 @@ from cStringIO import StringIO
 from pyast import *
 import pytest
 
-output_tests = [
+ast_output_tests = [
 
 (While(BinOp(Const(4), '==', Const(1)),
     [While(Const(False),
@@ -23,7 +23,7 @@ output_tests = [
 
 ]
 
-@pytest.mark.parametrize('ast,output', output_tests)
+@pytest.mark.parametrize('ast,output', ast_output_tests)
 def test_output(ast, output):
     ast.check()
     outbuf = StringIO()
@@ -31,3 +31,31 @@ def test_output(ast, output):
     ast.write_to(outio)
     outbuf.seek(0)
     assert outbuf.read() == output
+
+
+def test_indent_io():
+    outbuf = StringIO()
+    io = IndentIO(outbuf)
+
+    io.write('%d\n' % io.level)
+    with io.indent():
+        io.write('%d\n' % io.level)
+        with io.indent():
+            io.write('%d-' % io.level)
+            io.write('%d\n' % io.level)
+            with io.indent():
+                io.write('%d\n' % io.level)
+            io.write('%d\n' % io.level)
+        io.write('%d\n' % io.level)
+    io.write('%d\n' % io.level)
+
+    outbuf.seek(0)
+    assert outbuf.read() ==\
+"""0
+    1
+        2-2
+            3
+        2
+    1
+0
+"""
