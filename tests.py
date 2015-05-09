@@ -12,14 +12,11 @@ ast_output_tests = [
 """while (4 == 1):
     while False:
         True
-        4
-    
-"""),
+        4"""),
 
 (For('x', Const(4), [Pass()]),
 """for x in 4:
-    pass
-"""),
+    pass"""),
 
 ]
 
@@ -30,7 +27,11 @@ def test_output(ast, output):
     outio = IndentIO(outbuf)
     ast.write_to(outio)
     outbuf.seek(0)
-    assert outbuf.read() == output
+    # We strip whitespace off of the actual output here; Otherwise we will often
+    # get trailing whitespace on an empty line, which is weird to look at here
+    # given that it matters semantically for the tests, and it doesn't affect
+    # the python semantics, so we don't care.
+    assert outbuf.read().strip() == output
 
 
 def test_indent_io():
