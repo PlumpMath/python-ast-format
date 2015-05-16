@@ -212,18 +212,3 @@ class BinOp(Expr):
         _check_type(self.lhs, Expr)
         _check_type(self.rhs, Expr)
         _check_type(self.op, basestring)
-
-if __name__ == '__main__':
-    from indent_io import IndentIO
-    import sys
-    out = IndentIO(sys.stdout)
-
-    stmt = While(BinOp(Const(4), '==', Const(1)),
-       [While(Const(False),
-          [Const(True),
-           Const(4)])])
-    stmt.check()
-    stmt.write_to(out)
-    stmt = For('x', Const(4), [Pass()])
-    stmt.check()
-    stmt.write_to(out)
