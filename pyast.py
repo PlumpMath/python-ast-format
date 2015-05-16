@@ -135,6 +135,20 @@ def _intersperse(sep, lst):
             yield item
 
 
+class Assign(Statement):
+
+    def __init__(self, lhs, rhs):
+        self.lhs = lhs
+        self.rhs = rhs
+
+    def check(self):
+        _check_type(self.lhs, LValue)
+        _check_type(self.rhs, Expr)
+
+    def write_to(self, out):
+        _output(out, self.lhs, ' = ', self.rhs)
+
+
 class While(Statement):
 
     def __init__(self, condition, body):

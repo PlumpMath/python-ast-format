@@ -20,6 +20,8 @@ ast_output_tests = [
 
 (Pass(), "pass"),
 
+(Assign(Var('x'), Const(4)), "x = 4"),
+
 (While(Const(True), [Pass()]),
 """while True:
     pass"""),
@@ -54,6 +56,8 @@ ast_no_validate_tests = [
         Const(BinOp(Const(4), '+', Const(2))),
 
         Const(Pass()),
+
+        Assign(Const(4), Const(5)),
 
         While(Pass(), Pass()),
 
