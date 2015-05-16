@@ -5,6 +5,22 @@ import pytest
 
 ast_output_tests = [
 
+(Const(0), "0"),
+(Const('Hello'), "'Hello'"),
+(Const(True), 'True'),
+(Const(4.2), '4.2'),
+
+(BinOp(Const(4), '+', Const(2)),
+    "(4 + 2)"),
+(BinOp(BinOp(Const(4), '+', Const(2)), '<', Const(7)),
+    "((4 + 2) < 7)"),
+
+(Pass(), "pass"),
+
+(While(Const(True), [Pass()]),
+"""while True:
+    pass"""),
+
 (While(BinOp(Const(4), '==', Const(1)),
     [While(Const(False),
         [Const(True),
@@ -18,10 +34,23 @@ ast_output_tests = [
 """for x in 4:
     pass"""),
 
+(For('x', Const(4), [Pass(), Const(False)]),
+"""for x in 4:
+    pass
+    False"""),
+
 ]
 
 ast_no_validate_tests = [
+
+        Const(BinOp(Const(4), '+', Const(2))),
+
+        Const(Pass()),
+
         While(Pass(), Pass()),
+
+        BinOp(Const(4), Const(5), Const(6)),
+
 ]
 
 @pytest.mark.parametrize('ast,output', ast_output_tests)
