@@ -20,6 +20,10 @@ ast_output_tests = [
 
 ]
 
+ast_no_validate_tests = [
+        While(Pass(), Pass()),
+]
+
 @pytest.mark.parametrize('ast,output', ast_output_tests)
 def test_output(ast, output):
     ast.check()
@@ -32,6 +36,12 @@ def test_output(ast, output):
     # given that it matters semantically for the tests, and it doesn't affect
     # the python semantics, so we don't care.
     assert outbuf.read().strip() == output
+
+
+@pytest.mark.parametrize('ast', ast_no_validate_tests)
+def test_no_validate(ast):
+    with pytest.raises(ValidationError):
+        ast.check()
 
 
 def test_indent_io():
