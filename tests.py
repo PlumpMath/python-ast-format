@@ -10,6 +10,9 @@ ast_output_tests = [
 (Const(True), 'True'),
 (Const(4.2), '4.2'),
 
+(Var("x"), "x"),
+(Var("_hello"), "_hello"),
+
 (BinOp(Const(4), '+', Const(2)),
     "(4 + 2)"),
 (BinOp(BinOp(Const(4), '+', Const(2)), '<', Const(7)),
@@ -30,11 +33,11 @@ ast_output_tests = [
         True
         4"""),
 
-(For('x', Const(4), [Pass()]),
+(For(Var('x'), Const(4), [Pass()]),
 """for x in 4:
     pass"""),
 
-(For('x', Const(4), [Pass(), Const(False)]),
+(For(Var('x'), Const(4), [Pass(), Const(False)]),
 """for x in 4:
     pass
     False"""),
@@ -42,6 +45,11 @@ ast_output_tests = [
 ]
 
 ast_no_validate_tests = [
+
+        Var(4),
+        Var("def"),
+        Var("5eep"),
+        Var("list?"),
 
         Const(BinOp(Const(4), '+', Const(2))),
 

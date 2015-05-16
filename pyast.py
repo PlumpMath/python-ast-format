@@ -4,6 +4,39 @@ import re
 class ValidationError(Exception): pass
 
 ident_pattern = re.compile(r'^[_a-zA-Z][_a-zA-Z0-9]*$')
+keywords = set([
+    "and",
+    "as",
+    "assert",
+    "break",
+    "class",
+    "continue",
+    "def",
+    "del",
+    "elif",
+    "else",
+    "except",
+    "exec",
+    "finally",
+    "for",
+    "from",
+    "global",
+    "if",
+    "import",
+    "in",
+    "is",
+    "lambda",
+    "not",
+    "or",
+    "pass",
+    "print",
+    "raise",
+    "return",
+    "try",
+    "while",
+    "with",
+    "yield",
+])
 
 def _output(out, *args):
     for item in args:
@@ -121,19 +154,19 @@ class While(Statement):
 
 class For(Statement):
 
-    def __init__(self, var, seq, body):
-        self.var = var
+    def __init__(self, lval, seq, body):
+        self.lval = lval
         self.seq = seq
         self.body = body
 
     def write_to(self, out):
-        _output(out, 'for ', self.var, ' in ', self.seq, ':\n')
+        _output(out, 'for ', self.lval, ' in ', self.seq, ':\n')
         with out.indent():
             for stmt in self.body:
                 _output(out, stmt, '\n')
 
     def check(self):
-        # TODO: check `self.var`.
+        _check_type(self.lval, LValue)
         _check_type(self.seq, Expr)
         _check_block(self.body)
 
@@ -145,6 +178,24 @@ class Pass(Statement):
 
     def check(self):
         return True
+
+
+class LValue(Expr): pass
+
+class Var(LValue):
+
+    def __init__(self, name):
+        self.name = name
+
+    def check(self):
+        _check_type(self.name, str)
+        _check(re.match(ident_pattern, self.name),
+               "%r is not a valid identifier." % self.name)
+        _check(self.name not in keywords,
+               "Variable name %r is a keyword." % self.name)
+
+    def write_to(self, out):
+        out.write(self.name)
 
 
 class BinOp(Expr):
