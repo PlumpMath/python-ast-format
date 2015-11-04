@@ -38,6 +38,7 @@ keywords = set([
     "yield",
 ])
 
+
 def _output(out, *args):
     for item in args:
         if hasattr(item, 'write_to'):
@@ -46,6 +47,12 @@ def _output(out, *args):
             out.write(item)
         else:
             _output(out, *item)
+
+
+def _output_block(out, block):
+    with out.indent():
+        for stmt in block:
+            _output(out, stmt, '\n')
 
 
 def _check(cond, msg):
@@ -188,9 +195,7 @@ class While(Statement):
 
     def write_to(self, out):
         _output(out, 'while ', self.condition, ':\n')
-        with out.indent():
-            for stmt in self.body:
-                _output(out, stmt, '\n')
+        _output_block(out, self.body)
 
     def check(self):
         _check_rval(self.condition)
@@ -207,9 +212,7 @@ class For(Statement):
 
     def write_to(self, out):
         _output(out, 'for ', self.lval, ' in ', self.seq, ':\n')
-        with out.indent():
-            for stmt in self.body:
-                _output(out, stmt, '\n')
+        _output_block(out, self.body)
 
     def check(self):
         _check_lval(self.lval)
