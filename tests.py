@@ -23,26 +23,34 @@ ast_output_tests = [
 (Assign(Var('x'), Const(4)), "x = 4"),
 
 (While(Const(True), [Pass()]),
-"""while True:
-    pass"""),
+"""
+while True:
+    pass
+"""),
 
 (While(BinOp(Const(4), '==', Const(1)),
     [While(Const(False),
         [RValStatement(Const(True)),
          RValStatement(Const(4))])]),
-"""while (4 == 1):
+"""
+while (4 == 1):
     while False:
         True
-        4"""),
+        4
+"""),
 
 (For(Var('x'), Const(4), [Pass()]),
-"""for x in 4:
-    pass"""),
+"""
+for x in 4:
+    pass
+"""),
 
 (For(Var('x'), Const(4), [Pass(), RValStatement(Const(False))]),
-"""for x in 4:
+"""
+for x in 4:
     pass
-    False"""),
+    False
+"""),
 
 ]
 
@@ -75,11 +83,10 @@ def test_output(ast, output):
     outbuf = StringIO()
     ast.write_to(outbuf)
     outbuf.seek(0)
-    # We strip whitespace off of the actual output here; Otherwise we will often
-    # get trailing whitespace on an empty line, which is weird to look at here
-    # given that it matters semantically for the tests, and it doesn't affect
-    # the python semantics, so we don't care.
-    assert outbuf.read().strip() == output
+    # We strip whitespace off the ends, which lets not worry about extra blank
+    # lines in either the actual or expected output (which are not semantically
+    # significant.
+    assert outbuf.read().strip() == output.strip()
 
 
 @pytest.mark.parametrize('ast', ast_no_validate_tests)
