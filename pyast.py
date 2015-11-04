@@ -1,6 +1,9 @@
 from abc import ABCMeta, abstractmethod
 import re
 
+
+from indent_io import IndentIO
+
 class ValidationError(Exception): pass
 
 ident_pattern = re.compile(r'^[_a-zA-Z][_a-zA-Z0-9]*$')
@@ -50,6 +53,8 @@ def _output(out, *args):
 
 
 def _output_block(out, block):
+    if not isinstance(out, IndentIO):
+        out = IndentIO(out)
     with out.indent():
         for stmt in block:
             _output(out, stmt, '\n')

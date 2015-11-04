@@ -73,8 +73,7 @@ ast_no_validate_tests = [
 def test_output(ast, output):
     ast.check()
     outbuf = StringIO()
-    outio = IndentIO(outbuf)
-    ast.write_to(outio)
+    ast.write_to(outbuf)
     outbuf.seek(0)
     # We strip whitespace off of the actual output here; Otherwise we will often
     # get trailing whitespace on an empty line, which is weird to look at here
