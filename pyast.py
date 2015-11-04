@@ -66,6 +66,16 @@ def _check_block(value):
         stmt.check()
 
 
+def _check_rval(value):
+    _check_type(value, Expr)
+    _check(value.rval, "%r is not an R-value." % value)
+
+
+def _check_lval(value):
+    _check_type(value, Expr)
+    _check(value.lval, "%r is not an L-Value." % value)
+
+
 class Ast(object):
     __metaclass__ = ABCMeta
 
@@ -77,10 +87,31 @@ class Ast(object):
     def check(self):
         pass
 
+
 class Statement(Ast): pass
-class Expr(Statement): pass
+
+
+class Expr(Ast):
+
+    lval = False
+    rval = False
+
+
+class RValStatement(Statement):
+
+    def __init__(self, value):
+        self.value = value
+
+    def check(self):
+        _check_rval(self.value)
+
+    def write_to(self, out):
+        self.value.write_to(out)
+
 
 class Const(Expr):
+
+    rval = True
 
     def __init__(self, value):
         self.value = value
@@ -105,7 +136,7 @@ class Call(Expr):
 
     def write_to(self, out):
         args = _intersperse(', ', self.args)
-        kwargs = _instersperse(', ', [[k, '=', v] for (k, v) in self.kwargs])
+        kwargs = _intersperse(', ', [[k, '=', v] for (k, v) in self.kwargs])
         result = [args, kwargs]
         if self.starargs is not None:
             result.append(["*", self.starargs])
@@ -114,17 +145,17 @@ class Call(Expr):
         _output(out, self.callable, '(', _intersperse(', ', result), ')')
 
     def check(self):
-        _check_type(self.callable, Expr)
+        _check_rval(self.callable)
         for a in self.args:
-            _check_type(a, Expr)
-        for (k, v) in kwargs:
-            _check_type(v, Expr)
+            _check_rval(a)
+        for (k, v) in self.kwargs:
+            _check_rval(v)
             _check(re.match(ident_pattern, k),
                    '%r is not a valid identifier.' % k)
-        if starargs is not None:
-            _check_type(starargs, Expr)
-        if starstartkwargs is not None:
-            _check_type(starstarkwargs, Expr)
+        if self.starargs is not None:
+            _check_rval(self.starargs)
+        if self.starstartkwargs is not None:
+            _check_rval(self.starstarkwargs)
 
 
 def _intersperse(sep, lst):
@@ -142,8 +173,8 @@ class Assign(Statement):
         self.rhs = rhs
 
     def check(self):
-        _check_type(self.lhs, LValue)
-        _check_type(self.rhs, Expr)
+        _check_lval(self.lhs)
+        _check_rval(self.rhs)
 
     def write_to(self, out):
         _output(out, self.lhs, ' = ', self.rhs)
@@ -162,9 +193,10 @@ class While(Statement):
                 _output(out, stmt, '\n')
 
     def check(self):
-        _check_type(self.condition, Expr)
+        _check_rval(self.condition)
         self.condition.check()
         _check_block(self.body)
+
 
 class For(Statement):
 
@@ -180,8 +212,8 @@ class For(Statement):
                 _output(out, stmt, '\n')
 
     def check(self):
-        _check_type(self.lval, LValue)
-        _check_type(self.seq, Expr)
+        _check_lval(self.lval)
+        _check_rval(self.seq)
         _check_block(self.body)
 
 
@@ -194,9 +226,10 @@ class Pass(Statement):
         return True
 
 
-class LValue(Expr): pass
+class Var(Expr):
 
-class Var(LValue):
+    lval = True
+    rval = True
 
     def __init__(self, name):
         self.name = name
@@ -214,6 +247,8 @@ class Var(LValue):
 
 class BinOp(Expr):
 
+    rval = True
+
     def __init__(self, lhs, op, rhs):
         self.lhs = lhs
         self.op = op
@@ -223,6 +258,6 @@ class BinOp(Expr):
         _output(out, '(', self.lhs, ' ', self.op, ' ', self.rhs, ')')
 
     def check(self):
-        _check_type(self.lhs, Expr)
-        _check_type(self.rhs, Expr)
+        _check_rval(self.lhs)
+        _check_rval(self.rhs)
         _check_type(self.op, basestring)

@@ -28,8 +28,8 @@ ast_output_tests = [
 
 (While(BinOp(Const(4), '==', Const(1)),
     [While(Const(False),
-        [Const(True),
-         Const(4)])]),
+        [RValStatement(Const(True)),
+         RValStatement(Const(4))])]),
 """while (4 == 1):
     while False:
         True
@@ -39,7 +39,7 @@ ast_output_tests = [
 """for x in 4:
     pass"""),
 
-(For(Var('x'), Const(4), [Pass(), Const(False)]),
+(For(Var('x'), Const(4), [Pass(), RValStatement(Const(False))]),
 """for x in 4:
     pass
     False"""),
@@ -61,9 +61,13 @@ ast_no_validate_tests = [
 
         While(Pass(), Pass()),
 
+        # Need to wrap the statement in RValStatement:
+        While(Const(True), [Const(4)]),
+
         BinOp(Const(4), Const(5), Const(6)),
 
 ]
+
 
 @pytest.mark.parametrize('ast,output', ast_output_tests)
 def test_output(ast, output):
