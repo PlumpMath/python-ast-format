@@ -1,0 +1,3 @@
+include COPYING README.md
+include test-requirements.txt
+include .gitignore

@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 import re
 
 
-from indent_io import IndentIO
+from .indent_io import IndentIO
 
 class ValidationError(Exception): pass
 

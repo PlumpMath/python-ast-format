@@ -1,4 +1,4 @@
-from indent_io import IndentIO
+from pyast.indent_io import IndentIO
 from cStringIO import StringIO
 from pyast import *
 import pytest
