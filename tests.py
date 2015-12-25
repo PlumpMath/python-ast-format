@@ -18,6 +18,15 @@ ast_output_tests = [
 (BinOp(BinOp(Const(4), '+', Const(2)), '<', Const(7)),
     "((4 + 2) < 7)"),
 
+(Call(Var("f"), [], [], None, None),
+    "f()"),
+(Call(Var("f"), [Const(12)], [], None, None),
+    "f(12)"),
+(Call(Var("f"), [], [('x', Const(4))], Var('my_args'), None),
+    "f(x=4, *my_args)"),
+(Call(Var("f"), [Const(42)], [], None, Var('kwargs')),
+    "f(42, **kwargs)"),
+
 (Pass(), "pass"),
 
 (Assign(Var('x'), Const(4)), "x = 4"),

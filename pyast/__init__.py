@@ -93,11 +93,11 @@ class Ast(object):
 
     @abstractmethod
     def write_to(self, out):
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def check(self):
-        pass
+        pass  # pragma: no cover
 
 
 class Statement(Ast): pass
@@ -149,7 +149,7 @@ class Call(Expr):
     def write_to(self, out):
         args = _intersperse(', ', self.args)
         kwargs = _intersperse(', ', [[k, '=', v] for (k, v) in self.kwargs])
-        result = [args, kwargs]
+        result = list(args) + list(kwargs)
         if self.starargs is not None:
             result.append(["*", self.starargs])
         if self.starstarkwargs is not None:
@@ -166,7 +166,7 @@ class Call(Expr):
                    '%r is not a valid identifier.' % k)
         if self.starargs is not None:
             _check_rval(self.starargs)
-        if self.starstartkwargs is not None:
+        if self.starstarkwargs is not None:
             _check_rval(self.starstarkwargs)
 
 
