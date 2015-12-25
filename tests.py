@@ -52,6 +52,15 @@ for x in 4:
     False
 """),
 
+(Class('Foo', [Var('object')],
+       [Assign(Var('x'), Const(4)),
+        Assign(Var('y'), Const(36))]),
+"""
+class Foo(object):
+    x = 4
+    y = 36
+"""),
+
 ]
 
 ast_no_validate_tests = [

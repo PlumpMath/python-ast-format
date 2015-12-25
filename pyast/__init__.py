@@ -225,6 +225,26 @@ class For(Statement):
         _check_block(self.body)
 
 
+class Class(Statement):
+
+    def __init__(self, name, bases, body):
+        self.name = name
+        self.bases = bases
+        self.body = body
+
+    def write_to(self, out):
+        _output(out, 'class ', self.name, '(')
+        _output(out, _intersperse(', ', self.bases))
+        _output(out, '):\n')
+        _output_block(out, self.body)
+
+    def check(self):
+        Var(self.name).check()
+        for b in self.bases:
+            _check_rval(b)
+        _check_block(self.body)
+
+
 class Pass(Statement):
 
     def write_to(self, out):
