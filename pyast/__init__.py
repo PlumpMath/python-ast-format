@@ -52,6 +52,16 @@ def _output(out, *args):
             _output(out, *item)
 
 
+def _output_arglist(out, args, kwargs, starargs, starstarkwargs):
+        kwargs = [[k, '=', v] for (k, v) in kwargs]
+        result = list(args) + list(kwargs)
+        if starargs is not None:
+            result.append(["*", starargs])
+        if starstarkwargs is not None:
+            result.append(["**", starstarkwargs])
+        _output(out, '(', _intersperse(', ', result), ')')
+
+
 def _output_block(out, block):
     if not isinstance(out, IndentIO):
         out = IndentIO(out)
@@ -88,6 +98,12 @@ def _check_lval(value):
     _check(value.lval, "%r is not an L-Value." % value)
 
 
+def _check_id(name):
+    _check(re.match(ident_pattern, name),
+           '%r is not a valid identifier.' % name)
+    _check(name not in keywords, '%r is keyword.')
+
+
 class Ast(object):
     __metaclass__ = ABCMeta
 
@@ -121,6 +137,53 @@ class RValStatement(Statement):
         self.value.write_to(out)
 
 
+class Def(Statement):
+
+    def __init__(self,
+                 name,
+                 args=(),
+                 default_args=(),
+                 star=None,
+                 starstar=None,
+                 body=()):
+        self.name = name
+        self.args = args
+        self.default_args = default_args
+        self.star = star
+        self.starstar = starstar
+        self.body = body
+
+    def check(self):
+        _check_id(self.name)
+        ids = set()
+        for k in self.args:
+            _check_id(k)
+            _check(k not in ids, "Duplicate argument: %r" % k)
+            ids.add(k)
+        for k, v in self.default_args:
+            _check_id(k)
+            _check(k not in ids, "Duplicate argument: %r" % k)
+            ids.add(k)
+            _check_rval(v)
+        for k in self.star, self.starstar:
+            if k is None:
+                continue
+            _check_id(k)
+            _check(k not in ids, "Duplicate argument: %r" % k)
+            ids.add(k)
+        _check_block(self.body)
+
+    def write_to(self, out):
+        _output(out, "def ", self.name)
+        _output_arglist(out,
+                        self.args,
+                        self.default_args,
+                        self.star,
+                        self.starstar)
+        _output(out, ':\n')
+        _output_block(out, self.body)
+
+
 class Const(Expr):
 
     rval = True
@@ -147,14 +210,12 @@ class Call(Expr):
         self.starstarkwargs = starstarkwargs
 
     def write_to(self, out):
-        args = _intersperse(', ', self.args)
-        kwargs = _intersperse(', ', [[k, '=', v] for (k, v) in self.kwargs])
-        result = list(args) + list(kwargs)
-        if self.starargs is not None:
-            result.append(["*", self.starargs])
-        if self.starstarkwargs is not None:
-            result.append(["**", self.starstarkwargs])
-        _output(out, self.callable, '(', _intersperse(', ', result), ')')
+        _output(out, self.callable)
+        _output_arglist(out,
+                        self.args,
+                        self.kwargs,
+                        self.starargs,
+                        self.starstarkwargs)
 
     def check(self):
         _check_rval(self.callable)
@@ -162,8 +223,7 @@ class Call(Expr):
             _check_rval(a)
         for (k, v) in self.kwargs:
             _check_rval(v)
-            _check(re.match(ident_pattern, k),
-                   '%r is not a valid identifier.' % k)
+            _check_id(k)
         if self.starargs is not None:
             _check_rval(self.starargs)
         if self.starstarkwargs is not None:

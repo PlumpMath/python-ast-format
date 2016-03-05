@@ -33,6 +33,23 @@ ast_output_tests = [
 
 (Assign(Var('x'), Const(4)), "x = 4"),
 
+(Def('foo', body=[Pass()]),
+"""
+def foo():
+    pass
+"""),
+
+(Def('foo', ['x', 'y'], [('z', Const(2))], 'args', 'kwargs', [
+    Pass(),
+    Pass(),
+]),
+"""
+def foo(x, y, z=2, *args, **kwargs):
+    pass
+    pass
+"""),
+
+
 (While(Const(True), [Pass()]),
 """
 while True:
