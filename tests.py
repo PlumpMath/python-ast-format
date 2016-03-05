@@ -26,6 +26,8 @@ ast_output_tests = [
     "f(x=4, *my_args)"),
 (Call(Var("f"), [Const(42)], [], None, Var('kwargs')),
     "f(42, **kwargs)"),
+(Call(Var("f"), [Const(42)], [('x', Const(4))], Var('my_args'), Var('kwargs')),
+    "f(42, x=4, *my_args, **kwargs)"),
 
 (Pass(), "pass"),
 
