@@ -1,8 +1,5 @@
-
-
 class IndentIO(object):
-
-    def __init__(self, output,  indent='    ', newline='\n'):
+    def __init__(self, output, indent='    ', newline='\n'):
         self.output = output
         self.indent_str = indent
         self.newline = newline
@@ -29,7 +26,6 @@ class IndentIO(object):
         return self._Block(self)
 
     class _Block(object):
-
         def __init__(self, io):
             self.io = io
 

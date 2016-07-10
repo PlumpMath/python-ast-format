@@ -1,10 +1,12 @@
 from abc import ABCMeta, abstractmethod
 import re
 
-
 from .indent_io import IndentIO
 
-class ValidationError(Exception): pass
+
+class ValidationError(Exception):
+    pass
+
 
 ident_pattern = re.compile(r'^[_a-zA-Z][_a-zA-Z0-9]*$')
 keywords = set([
@@ -53,13 +55,13 @@ def _output(out, *args):
 
 
 def _output_arglist(out, args, kwargs, starargs, starstarkwargs):
-        kwargs = [[k, '=', v] for (k, v) in kwargs]
-        result = list(args) + list(kwargs)
-        if starargs is not None:
-            result.append(["*", starargs])
-        if starstarkwargs is not None:
-            result.append(["**", starstarkwargs])
-        _output(out, '(', _intersperse(', ', result), ')')
+    kwargs = [[k, '=', v] for (k, v) in kwargs]
+    result = list(args) + list(kwargs)
+    if starargs is not None:
+        result.append(["*", starargs])
+    if starstarkwargs is not None:
+        result.append(["**", starstarkwargs])
+    _output(out, '(', _intersperse(', ', result), ')')
 
 
 def _output_block(out, block):
@@ -76,13 +78,14 @@ def _check(cond, msg):
 
 
 def _check_type(value, cls):
-    _check(isinstance(value, cls),
-           'Value %r is not of type %s' % (value, cls.__name__))
+    _check(
+        isinstance(value, cls),
+        'Value %r is not of type %s' % (value, cls.__name__))
 
 
 def _check_block(value):
-    _check(len(value) >= 1,
-           'At least one statement is required within a block.')
+    _check(
+        len(value) >= 1, 'At least one statement is required within a block.')
     for stmt in value:
         _check_type(stmt, Statement)
         stmt.check()
@@ -99,8 +102,8 @@ def _check_lval(value):
 
 
 def _check_id(name):
-    _check(re.match(ident_pattern, name),
-           '%r is not a valid identifier.' % name)
+    _check(
+        re.match(ident_pattern, name), '%r is not a valid identifier.' % name)
     _check(name not in keywords, '%r is keyword.')
 
 
@@ -116,7 +119,8 @@ class Ast(object):
         pass  # pragma: no cover
 
 
-class Statement(Ast): pass
+class Statement(Ast):
+    pass
 
 
 class Expr(Ast):
@@ -126,7 +130,6 @@ class Expr(Ast):
 
 
 class RValStatement(Statement):
-
     def __init__(self, value):
         self.value = value
 
@@ -138,7 +141,6 @@ class RValStatement(Statement):
 
 
 class Def(Statement):
-
     def __init__(self,
                  name,
                  args=(),
@@ -175,10 +177,7 @@ class Def(Statement):
 
     def write_to(self, out):
         _output(out, "def ", self.name)
-        _output_arglist(out,
-                        self.args,
-                        self.default_args,
-                        self.star,
+        _output_arglist(out, self.args, self.default_args, self.star,
                         self.starstar)
         _output(out, ':\n')
         _output_block(out, self.body)
@@ -195,13 +194,13 @@ class Const(Expr):
         out.write(repr(self.value))
 
     def check(self):
-        _check(type(self.value) in (bool, float, int, str, unicode),
-               '%r (type %s) is not a valid Const' %
-                   (self.value, str(type(self.value))))
+        _check(
+            type(self.value) in (bool, float, int, str, unicode),
+            '%r (type %s) is not a valid Const' %
+            (self.value, str(type(self.value))))
 
 
 class Call(Expr):
-
     def __init__(self, callable, args, kwargs, starargs, starstarkwargs):
         self.callable = callable
         self.args = args
@@ -211,10 +210,7 @@ class Call(Expr):
 
     def write_to(self, out):
         _output(out, self.callable)
-        _output_arglist(out,
-                        self.args,
-                        self.kwargs,
-                        self.starargs,
+        _output_arglist(out, self.args, self.kwargs, self.starargs,
                         self.starstarkwargs)
 
     def check(self):
@@ -239,7 +235,6 @@ def _intersperse(sep, lst):
 
 
 class Assign(Statement):
-
     def __init__(self, lhs, rhs):
         self.lhs = lhs
         self.rhs = rhs
@@ -253,7 +248,6 @@ class Assign(Statement):
 
 
 class While(Statement):
-
     def __init__(self, condition, body):
         self.condition = condition
         self.body = body
@@ -269,7 +263,6 @@ class While(Statement):
 
 
 class For(Statement):
-
     def __init__(self, lval, seq, body):
         self.lval = lval
         self.seq = seq
@@ -286,7 +279,6 @@ class For(Statement):
 
 
 class Class(Statement):
-
     def __init__(self, name, bases, body):
         self.name = name
         self.bases = bases
@@ -306,7 +298,6 @@ class Class(Statement):
 
 
 class Pass(Statement):
-
     def write_to(self, out):
         out.write('pass')
 
@@ -324,8 +315,9 @@ class Var(Expr):
 
     def check(self):
         _check_type(self.name, str)
-        _check(re.match(ident_pattern, self.name),
-               "%r is not a valid identifier." % self.name)
+        _check(
+            re.match(ident_pattern, self.name),
+            "%r is not a valid identifier." % self.name)
         _check(self.name not in keywords,
                "Variable name %r is a keyword." % self.name)
 

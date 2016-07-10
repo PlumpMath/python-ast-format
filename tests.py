@@ -3,6 +3,8 @@ from cStringIO import StringIO
 from pyast import *
 import pytest
 
+
+# yapf: disable
 ast_output_tests = [
 
 (Const(0), "0"),
@@ -93,26 +95,26 @@ class Foo(object):
 
 ast_no_validate_tests = [
 
-        Var(4),
-        Var("def"),
-        Var("5eep"),
-        Var("list?"),
+    Var(4),
+    Var("def"),
+    Var("5eep"),
+    Var("list?"),
 
-        Const(BinOp(Const(4), '+', Const(2))),
+    Const(BinOp(Const(4), '+', Const(2))),
 
-        Const(Pass()),
+    Const(Pass()),
 
-        Assign(Const(4), Const(5)),
+    Assign(Const(4), Const(5)),
 
-        While(Pass(), Pass()),
+    While(Pass(), Pass()),
 
-        # Need to wrap the statement in RValStatement:
-        While(Const(True), [Const(4)]),
+    # Need to wrap the statement in RValStatement:
+    While(Const(True), [Const(4)]),
 
-        BinOp(Const(4), Const(5), Const(6)),
+    BinOp(Const(4), Const(5), Const(6)),
 
 ]
-
+# yapf: enable
 
 @pytest.mark.parametrize('ast,output', ast_output_tests)
 def test_output(ast, output):
